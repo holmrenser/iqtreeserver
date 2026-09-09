@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:15.4
+    environment:
+      POSTGRES_USER: iqtreeserver
+      POSTGRES_PASSWORD: iqtreeserver
+      POSTGRES_DB: iqtreeserver
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iqtreeserver"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+    command: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: postgresql://iqtreeserver:iqtreeserver@postgres:5432/iqtreeserver
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: app.Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://iqtreeserver:iqtreeserver@postgres:5432/iqtreeserver
+      JOB_RETRY_LIMIT: ${JOB_RETRY_LIMIT:-2}
+      JOB_EXPIRE_SECONDS: ${JOB_EXPIRE_SECONDS:-14400}
+      PGBOSS_MAX_CONNECTIONS: ${PGBOSS_MAX_CONNECTIONS:-5}
+      IQTREE_JOB_TIMEOUT_MS: ${IQTREE_JOB_TIMEOUT_MS:-10800000}
+      IQTREE_WORKER_THREADS: ${IQTREE_WORKER_THREADS:-AUTO}
+      IQTREE_WORKER_MAX_THREADS: ${IQTREE_WORKER_MAX_THREADS:-4}
+      IQTREE_WORKER_MEM_GB: ${IQTREE_WORKER_MEM_GB:-4}
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-52428800}
+      MAX_BUFFER_BYTES: ${MAX_BUFFER_BYTES:-104857600}
+      MAX_RESULTS_ZIP_BYTES: ${MAX_RESULTS_ZIP_BYTES:-524288000}
+      DATA_DIR: /data
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-iqtreeserver <no-reply@iqtreeserver.local>}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  iqtreeworker:
+    build:
+      context: .
+      dockerfile: worker.Dockerfile
+    deploy:
+      replicas: 2
+    environment:
+      DATABASE_URL: postgresql://iqtreeserver:iqtreeserver@postgres:5432/iqtreeserver
+      JOB_RETRY_LIMIT: ${JOB_RETRY_LIMIT:-2}
+      JOB_EXPIRE_SECONDS: ${JOB_EXPIRE_SECONDS:-14400}
+      PGBOSS_MAX_CONNECTIONS: ${PGBOSS_MAX_CONNECTIONS:-5}
+      IQTREE_JOB_TIMEOUT_MS: ${IQTREE_JOB_TIMEOUT_MS:-10800000}
+      IQTREE_WORKER_THREADS: ${IQTREE_WORKER_THREADS:-AUTO}
+      IQTREE_WORKER_MAX_THREADS: ${IQTREE_WORKER_MAX_THREADS:-4}
+      IQTREE_WORKER_MEM_GB: ${IQTREE_WORKER_MEM_GB:-4}
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-52428800}
+      MAX_BUFFER_BYTES: ${MAX_BUFFER_BYTES:-104857600}
+      MAX_RESULTS_ZIP_BYTES: ${MAX_RESULTS_ZIP_BYTES:-524288000}
+      DATA_DIR: /data
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-iqtreeserver <no-reply@iqtreeserver.local>}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-data:

@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model IqtreeJob {
+  id String @id @unique // hash-derived job id: sha256(alignment[+partition]) + validated options
+
+  // input, kept for provenance/reproducibility and worker re-materialization
+  parameters        Json // validated IqtreeSubmission + alignmentSha256/partitionSha256
+  alignmentFilename String
+  alignmentData     Bytes
+  partitionFilename String?
+  partitionData     Bytes?
+  notifyEmail       String? // optional - sent a completion/failure notification if SMTP is configured
+
+  submitted DateTime  @default(now())
+  started   DateTime?
+  finished  DateTime?
+  err       String?
+
+  // outputs
+  log                 String? // .log contents
+  reportRaw           String? // full .iqtree report text
+  reportSummary       Json? // parsed structured summary (see src/lib/iqtree/parseReport.ts)
+  treeNewick          String? // .treefile
+  consensusTreeNewick String? // .contree, present only when -B or -b was used
+  resultsZip          Bytes? // zip of the full output dir, minus operational-only files
+  resultsZipBytes     Int? // size of resultsZip, so the UI can show it without loading the blob
+
+  @@map("iqtreejob")
+}

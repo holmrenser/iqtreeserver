@@ -1,0 +1,5 @@
+IQ-TREE something unexpected happened here
+
+This file does not have the usual structure at all, simulating a future
+IQ-TREE version whose report format drifted enough that our regex-based
+extractors should all degrade to null instead of throwing.
