@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
+import { BASE_PATH } from "@/lib/basePath";
 
 interface JobStatus {
   done: boolean;
@@ -18,7 +19,7 @@ interface JobStatus {
 export function ResultsPoller({ jobId }: { jobId: string }) {
   const router = useRouter();
 
-  useSWR<JobStatus>(`/api/jobs/${jobId}`, fetcher, {
+  useSWR<JobStatus>(`${BASE_PATH}/api/jobs/${jobId}`, fetcher, {
     refreshInterval: (data) => (data?.done ? 0 : 4000),
     onSuccess: (data) => {
       if (data.done) router.refresh();

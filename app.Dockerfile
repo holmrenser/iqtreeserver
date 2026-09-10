@@ -12,6 +12,11 @@ RUN npm ci --omit=dev
 
 FROM deps AS builder
 WORKDIR /app
+# Inlined into the client bundle at build time - see next.config.ts and
+# src/lib/basePath.ts. Set to e.g. "/iqtree" to serve behind a reverse proxy
+# at a subpath; leave unset to serve from the root.
+ARG NEXT_PUBLIC_BASE_PATH=""
+ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 COPY prisma ./prisma
 COPY prisma7.config.ts ./
 COPY scripts ./scripts

@@ -54,6 +54,22 @@ is served on [http://localhost:3000](http://localhost:3000). The worker image
 downloads and checksum-verifies the `iqtree3` binary for whatever platform
 it's built on (`amd64` or `arm64` - see `worker.Dockerfile`).
 
+## Deploying under a subpath
+
+To serve the app behind a reverse proxy at a subpath (e.g.
+`bioinformatics.nl/iqtree`), set two env vars before building/running:
+
+- `NEXT_PUBLIC_BASE_PATH=/iqtree` - a **build-time** arg (see `app.Dockerfile`,
+  `docker-compose.yml`'s `app.build.args`); it's inlined into the client
+  bundle, so changing it requires a rebuild. Leave unset to serve from the
+  root.
+- `APP_URL=https://bioinformatics.nl/iqtree` - used to build the links in
+  job-completion emails (`src/lib/email.ts`); include the subpath here too.
+
+Your reverse proxy must forward `/iqtree/*` through unmodified (no
+path-stripping) - `basePath` expects to see the full `/iqtree/...` path on
+incoming requests.
+
 ## Tests
 
 ```bash

@@ -28,8 +28,10 @@ services:
     build:
       context: .
       dockerfile: app.Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
       DATABASE_URL: postgresql://iqtreeserver:iqtreeserver@postgres:5432/iqtreeserver
       JOB_RETRY_LIMIT: ${JOB_RETRY_LIMIT:-2}

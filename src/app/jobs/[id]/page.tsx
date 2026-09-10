@@ -6,6 +6,7 @@ import { ResultsPoller } from "./results-poller";
 import { TreeSection } from "./tree-viewer";
 import { ReportPanel } from "./report-panel";
 import { RawLogPanel } from "./raw-log-panel";
+import { BASE_PATH } from "@/lib/basePath";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -74,7 +75,7 @@ export default async function JobPage({ params }: PageProps) {
           {job.reportSummary && <ReportPanel summary={job.reportSummary as unknown as IqtreeReportSummary} />}
 
           {job.resultsZipBytes !== null && (
-            <a href={`/api/jobs/${job.id}/download`} className={buttonVariants({ className: "self-start" })}>
+            <a href={`${BASE_PATH}/api/jobs/${job.id}/download`} className={buttonVariants({ className: "self-start" })}>
               Download full results ({formatBytes(job.resultsZipBytes)})
             </a>
           )}

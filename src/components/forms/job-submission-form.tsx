@@ -6,6 +6,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { iqtreeSubmissionSchema, type IqtreeSubmission } from "@/lib/iqtree/schema";
+import { BASE_PATH } from "@/lib/basePath";
 
 // react-hook-form's live field values follow the schema's *input* shape
 // (fields with `.default(...)` are optional until resolved), while the
@@ -83,7 +84,7 @@ export function JobSubmissionForm({ emailEnabled }: JobSubmissionFormProps) {
       if (partitionFile) form.set("partition", partitionFile, partitionFile.name);
       if (emailEnabled && notifyEmail.trim()) form.set("notifyEmail", notifyEmail.trim());
 
-      const res = await fetch("/api/submit", { method: "POST", body: form });
+      const res = await fetch(`${BASE_PATH}/api/submit`, { method: "POST", body: form });
       const body = await res.json();
 
       if (!res.ok) {

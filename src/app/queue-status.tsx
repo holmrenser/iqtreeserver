@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetcher } from "@/lib/fetcher";
+import { BASE_PATH } from "@/lib/basePath";
 
 interface QueueCounts {
   waiting: number;
@@ -13,7 +14,7 @@ interface QueueCounts {
 }
 
 export function QueueStatus() {
-  const { data, isLoading, error } = useSWR<QueueCounts>("/api/queue", fetcher, {
+  const { data, isLoading, error } = useSWR<QueueCounts>(`${BASE_PATH}/api/queue`, fetcher, {
     refreshInterval: 5_000,
     revalidateOnMount: true,
   });
